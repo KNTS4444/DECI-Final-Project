@@ -1,0 +1,158 @@
+First Question:
+How much is each member borrowing?
+I make left join between members table and checkouts table by member id
+I use left join to show the members who haven't borrowed anything at all
+Then group by member id and select member id, first name and borrowing count
+SQL QUERY:
+count = """
+SELECT M.member_id, M.first_name, COUNT(C.checkout_id) AS Borrowing_COUNT
+FROM MEMBERS M
+LEFT JOIN CHECKOUTS C
+ON M.member_id = C.member_id
+GROUP BY M.member_id
+"""
+sql_query(count)
+RESULT OUTPUT:
+	member_id	first_name	Borrowing_COUNT
+0	1001	    Salma	     1
+1	1002	    Fares	     2
+2	1003	    Bassel	     9
+3	1004	    Fares	     0
+4	1005	    Youssef	     3
+...	...	...	...
+75	1076	    Dina	     7
+76	1077	    Lina	     6
+77	1078	    Habiba	     0
+78	1079	    Rana	     10
+79	1080	   Bassel	     2 
+Second Question:
+Which books match a chosen author pattern?
+I chose to show the books whose author name starts with M
+i filter the books by using where to show books whose author name like M and select title
+SQL QUERY:
+like = """
+SELECT title
+FROM BOOKS
+WHERE author like "M%"
+"""
+print("The titles of the books whose author name starts with M")
+sql_query(like)
+RESULT OUTPUT:
+    title
+0	Storms and Sailboats
+1	The Clockwork Orchard
+2	Notes from the Delta
+3	The Glass Beehive
+Third Question:
+What are the most popular books?
+I make join between books table and checkout table by book id
+Then group by book id and order by the count descendingly showing only the first 5 by using limit
+And select book id, title, count
+SQL QUERY:
+popular_books = """
+SELECT B.book_id, B.title, COUNT(c.checkout_id) AS COUNT
+FROM BOOKS B
+JOIN CHECKOUTS C
+ON B.book_id = C.book_id
+GROUP BY B.book_id 
+ORDER BY COUNT DESC LIMIT 5
+"""
+sql_query(popular_books)
+RESULT OUTPUT:
+  book_id	title	            COUNT
+0	501	  The Silver Kite	      57
+1	507	  Fossils and Fireflies	  55
+2	513	  Circuits for Beginners  46
+3	519	  Kites Over Cairo	      38
+4	525	  Storms and Sailboats	  25
+Forth Question:
+Who are the most active readers?
+I make join between members table and checkouts table by member id
+Then group by member id and order by borrowing count descendingly showing only the first 10 by using limit
+And select member id, first name, count
+SQL QUERY:
+active_readers = """
+SELECT M.member_id, M.first_name, COUNT(C.checkout_id) AS Borrowing_Count
+FROM MEMBERS M
+JOIN CHECKOUTS C
+ON M.member_id = C.member_id
+GROUP BY M.member_id
+ORDER BY Borrowing_Count DESC LIMIT 10
+"""
+sql_query(active_readers)
+RESULT OUTPUT:
+
+ member_id	first_name	Borrowing_Count
+0	1034	Aya	            25
+1	1044	Sherif	        21
+2	1008	Ziad	        19
+3	1027	Mostafa	        18
+4	1010	Nour	        18
+5	1065	Adam	        17
+6	1024	Youssef	        17
+7	1018	Ahmed	        17
+8	1047	Sara	        16
+9	1030	Reem	        16
+Fifth Question:
+What does a neighborhood'activity look like further back in time?
+I chose Maadi, I make join between members table and checkouts table by member id
+I filter by using where to show only what in Maadi, then order by checkout date to show from newest to oldest
+And looking past the ten most recent by using limit and offset
+And select member id, first name, neighborhood, checkout date
+SQL QUERY:
+maadi = """
+SELECT all columns
+FROM MEMBERS M
+JOIN CHECKOUTS C
+ON M.member_id = C.member_id
+WHERE M.neighborhood = "Maadi"
+ORDER BY C.checkout_date DESC
+LIMIT 10 OFFSET 10
+"""
+print("Neighborhood is Maadi")
+sql_query(maadi)
+RESULT OUTPUT:
+	member_id	first_name	neighborhood	checkout_date
+0	1003	Bassel	Maadi	2025-09-04
+1	1017	Adam	Maadi	2025-08-25
+2	1008	Ziad	Maadi	2025-08-23
+3	1003	Bassel	Maadi	2025-08-21
+4	1018	Ahmed	Maadi	2025-08-19
+5	1015	Hamza	Maadi	2025-08-08
+6	1018	Ahmed	Maadi	2025-08-04
+7	1013	Ziad	Maadi	2025-07-27
+8	1003	Bassel	Maadi	2025-07-22
+9	1009	Hassan	Maadi	2025-07-22
+ Data combination and difference between gathering data from web page and API:
+ (A)Data combination:
+ First step:
+ Reading database file and the tables inside it, answering some questions about it
+ Then merging members table with checkouts table in combined_sql by using pd.merge
+ Second step:
+ Reading json file which is about details of the books 
+ Then merging json file with combined_Sql in combined_json_sql by using pd.merge
+ Third and last step:
+ Reading html file and selecting first table in it
+ Then merging it with combined_json_sql in combined data by using pd.concat to combine all rows
+ Finally saving combined data to csv file naming it "task1_combined_data.csv"
+(B)Difference between gathering data from web page and API:
+ 1-Web page:
+ It is built for humans to view on a browser
+ It returns the whole page as HTML that we must clean to pull out what we need
+ The page's layout can change at any time, so the code we wrote can suddenly stop working
+ It needs more work that we must search through the page tags
+ If the website doesn't have an API, so we scrape the data from web page
+ 2-API:
+ It is built for programs to read directly
+ It returns organized, tidy, ready to use data usually as JSON
+ The data structure rarely changes
+ It is much easier than getting data from a web page
+ If the website has an API, we use it as it is an official door the website opens for us
+Why it matters in this project?
+ Because library data as checkouts changes all the time
+ API gives us a reliable way to get live updates
+ Web page is risky because if the website updates its design, our code stops working
+Result from my work:
+ API(as json file): when it is read, it changes directly into a dataframe ready for merging
+ Web page(as html file): when it is read, it returns a list containing the table,
+  so I have to extract the first table(html[0]) as a dataframe to be able to merge it
